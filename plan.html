@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Plant Care Assistant</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0fff4;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #2d6a4f;
+    }
+    .plant {
+      background: #d8f3dc;
+      margin: 10px auto;
+      padding: 15px;
+      border-radius: 10px;
+      max-width: 400px;
+    }
+    input, button {
+      padding: 8px;
+      margin: 5px;
+    }
+    button {
+      background: #40916c;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1b4332;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌿 Plant Care Assistant</h1>
+  <p>Add your plants and get reminders!</p>
+
+  <input type="text" id="plantName" placeholder="Plant name">
+  <select id="plantType">
+    <option value="daily">Needs water daily</option>
+    <option value="2days">Water every 2 days</option>
+    <option value="weekly">Water weekly</option>
+  </select>
+  <button onclick="addPlant()">Add Plant</button>
+
+  <div id="plantList"></div>
+
+  <script>
+    const plants = [];
+
+    function addPlant() {
+      const name = document.getElementById("plantName").value;
+      const type = document.getElementById("plantType").value;
+
+      if (!name) {
+        alert("Please enter a plant name!");
+        return;
+      }
+
+      const plant = { name, type, lastWatered: new Date() };
+      plants.push(plant);
+      renderPlants();
+    }
+
+    function renderPlants() {
+      const list = document.getElementById("plantList");
+      list.innerHTML = "";
+      plants.forEach((p, i) => {
+        list.innerHTML += `
+          <div class="plant">
+            <h3>${p.name}</h3>
+            <p>Watering schedule: ${p.type}</p>
+            <button onclick="waterPlant(${i})">💧 Mark as Watered</button>
+          </div>
+        `;
+      });
+    }
+
+    function waterPlant(index) {
+      plants[index].lastWatered = new Date();
+      sendNotification(${plants[index].name} watered!);
+    }
+
+    function sendNotification(message) {
+      if (Notification.permission === "granted") {
+        new Notification("Plant Care Reminder", { body: message });
+      }
+    }
+    setInterval(() => {
+      const now = new Date();
+      plants.forEach(p => {
+        const last = new Date(p.lastWatered);
+        let diff = (now - last) / (1000 * 60 * 60); // hours difference
+
+        if (
+          (p.type === "daily" && diff >= 24) ||
+          (p.type === "2days" && diff >= 48) ||
+          (p.type === "weekly" && diff >= 168)
+        ) {
+          sendNotification(💧 Time to water ${p.name}!);
+        }
+      });
+    }, 60000); // check every 1 minute
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+  </script>
+</body>
+</html>
